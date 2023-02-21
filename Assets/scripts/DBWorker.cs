@@ -28,6 +28,7 @@ public class DBWorker : MonoBehaviour
     public TMP_InputField fuelName;
     public TMP_InputField fuelPrice;
     public List<string> fuelTypeList;//= new List<string> { "АИ-92", "АИ-95" };
+    public DBTest db;
 
     string stringtochange;
     bool toChange { set; get; }
@@ -36,37 +37,6 @@ public class DBWorker : MonoBehaviour
         addButton = GameObject.Find("AddButton").GetComponent<Button>();
         changeButton = GameObject.Find("ChangeButton").GetComponent<Button>();
         deleteButton = GameObject.Find("DeleteButton").GetComponent<Button>();
-        if(fuelType != null)
-        {
-            setDropDown();
-        }
-    }
-    private void Start()
-    {
-        // Получаем отсортированную таблицу лидеров
-        DataTable ftypeTable = DBManager.GetTable("SELECT * FROM Ftype;");
-        
-
-        fuelTypeList=new List<string>();
-        for (int i=0;i<ftypeTable.Rows.Count;i++)
-            fuelTypeList.Add(ftypeTable.Rows[i][1].ToString());
-            if(fuelType != null)
-        {
-            setDropDown();
-        }
-        if (carFuelType!=null)
-            setDropDown();
-
-        
-
-
-
-        // Получаем id лучшего игрока
-        //int idBestPlayer = int.Parse(scoreboard.Rows[0][1].ToString());
-        // Получаем ник лучшего игрока
-        //string nickname = MyDataBase.ExecuteQueryWithAnswer($"SELECT nickname FROM Player WHERE id_player = {idBestPlayer};");
-        
-        //Debug.Log(scoreboard.Rows[0][2].ToString());
     }
 
     public void setToChange(bool value) {
@@ -78,21 +48,46 @@ public class DBWorker : MonoBehaviour
     }
     public void deleteComponent()
     {
-        Destroy(prefab);
-        changeButton.GetComponentInChildren<TextMeshProUGUI>().text = "Изменить";
-        deleteButton.GetComponentInChildren<TextMeshProUGUI>().text = "Удалить";
-        addButton.GetComponentInChildren<TextMeshProUGUI>().text = "Добавить";
+        int type = prefab.GetComponentsInChildren<ObjectPars>()[0].type;
+        string tab ="";
+        int depend=0;
+        switch(type){
+            case 0:{
+                tab="Car";
+                break;
+            }
+            case 1:{
+                tab="FuelTank";
+                
+                break;
+            }
+            case 2:{
+                tab="TRK";
+                break;
+            }
+            case 3:{
+                tab="Ftype";
+                depend = int.Parse(DBManager.ExecuteQueryWithAnswer($"Select count(car_id) from Car where car_ftype_id={prefab.GetComponentsInChildren<ObjectPars>()[0].id}"))+int.Parse(DBManager.ExecuteQueryWithAnswer($"Select count(ftank_id) from FuelTank where ftank_ftype_id={prefab.GetComponentsInChildren<ObjectPars>()[0].id}"));
+                break;
+            }
+        }
+        if (depend==0)
+        {
+            DBManager.ExecuteQueryWithoutAnswer($"Delete from {tab}  where ftank_id={prefab.GetComponentsInChildren<ObjectPars>()[0].id}");
+            Destroy(prefab);
+            changeButton.GetComponentInChildren<TextMeshProUGUI>().text = "Изменить";
+            deleteButton.GetComponentInChildren<TextMeshProUGUI>().text = "Удалить";
+            addButton.GetComponentInChildren<TextMeshProUGUI>().text = "Добавить";
+        }
+        else{
+            //место для ошибки
+        }
+        
     }
     public void changeChangeButton(TextMeshProUGUI item)
     {
         changeButton.GetComponentInChildren<TextMeshProUGUI>().text = "Изменить " + item.text;        
         deleteButton.GetComponentInChildren<TextMeshProUGUI>().text = "Удалить " + item.text;        
-    }
-    public void setDropDown() {
-        fuelType.ClearOptions();
-        fuelType.AddOptions(fuelTypeList);
-        carFuelType.ClearOptions();
-        carFuelType.AddOptions(fuelTypeList);
     }
 
     public void openAddPanel()
@@ -123,7 +118,7 @@ public class DBWorker : MonoBehaviour
                 AddFT.SetActive(true);
                 FTName.text = prefab.GetComponentsInChildren<LayoutElement>()[0].GetComponentInChildren<TextMeshProUGUI>().text;
                 FTVolume.text = prefab.GetComponentsInChildren<TextMeshProUGUI>()[3].text.Split(" ")[0];
-                fuelType.value = fuelTypeList.IndexOf((prefab.GetComponentsInChildren<TextMeshProUGUI>()[4].text));
+                fuelType.value = db.Fhelp.IndexOf((prefab.GetComponentsInChildren<TextMeshProUGUI>()[4].text));
                 break;          
             case "ТРК":
                 AddFD.SetActive(true);
@@ -140,21 +135,34 @@ public class DBWorker : MonoBehaviour
                 AddCar.SetActive(true);
                 carName.text = prefab.GetComponentsInChildren<LayoutElement>()[0].GetComponentInChildren<TextMeshProUGUI>().text;
                 carVolume.text = prefab.GetComponentsInChildren<TextMeshProUGUI>()[3].text.Split(" ")[0];
-                carFuelType.value = fuelTypeList.IndexOf((prefab.GetComponentsInChildren<TextMeshProUGUI>()[4].text));
+                carFuelType.value = db.Fhelp.IndexOf((prefab.GetComponentsInChildren<TextMeshProUGUI>()[4].text));
                 break;
         }
     }
     public void addTRK()
     {
         if (toChange) {
+            depend = int.Parse(DBManager.ExecuteQueryWithAnswer($"Select count(car_id) from Car where car_ftype_id={prefab.GetComponentsInChildren<ObjectPars>()[0].id}"))+int.Parse(DBManager.ExecuteQueryWithAnswer($"Select count(ftank_id) from FuelTank where ftank_ftype_id={prefab.GetComponentsInChildren<ObjectPars>()[0].id}"));   
+            DBManager.ExecuteQueryWithoutAnswer($"UPDATE FuelTank set ftank_name='{FTName.text}',ftank_volume={int.Parse(FTVolume.text)},ftank_ftype_id={db.FuelList[fuelType.value].id} where ftank_id={prefab.GetComponentsInChildren<ObjectPars>()[0].id}");
+            prefab.GetComponentsInChildren<ObjectPars>()[0].name = FTName.text;
+            prefab.GetComponentsInChildren<ObjectPars>()[0].par1 = int.Parse(FTVolume.text);
+            prefab.GetComponentsInChildren<ObjectPars>()[0].fuel_id = db.FuelList[fuelType.value].id;
+            prefab.GetComponentsInChildren<ObjectPars>()[0].fuel_name = db.FuelList[fuelType.value].name;
             prefab.GetComponentsInChildren<LayoutElement>()[0].GetComponentInChildren<TextMeshProUGUI>().text = FTName.text;
             prefab.GetComponentsInChildren<TextMeshProUGUI>()[3].text = FTVolume.text + " Л";
-            prefab.GetComponentsInChildren<TextMeshProUGUI>()[4].text = fuelTypeList[fuelType.value];
+            prefab.GetComponentsInChildren<TextMeshProUGUI>()[4].text = db.FuelList[fuelType.value].name;
         } else {
             var copy = Instantiate(prefab, content.transform);
+            DBManager.ExecuteQueryWithoutAnswer($"INSERT INTO FuelTank(ftank_name,ftank_volume,ftank_ftype_id) VALUES ('{FTName.text}',{int.Parse(FTVolume.text)},{db.FuelList[fuelType.value].id});");
+            int ind = int.Parse(DBManager.ExecuteQueryWithAnswer("SELECT max(ftank_id) from FuelTank"));
+            copy.GetComponentsInChildren<ObjectPars>()[0].id = ind;
+            copy.GetComponentsInChildren<ObjectPars>()[0].name = FTName.text;
+            copy.GetComponentsInChildren<ObjectPars>()[0].par1 = int.Parse(FTVolume.text);
+            copy.GetComponentsInChildren<ObjectPars>()[0].fuel_id = db.FuelList[fuelType.value].id;
+            copy.GetComponentsInChildren<ObjectPars>()[0].fuel_name = db.FuelList[fuelType.value].name;
             copy.GetComponentsInChildren<LayoutElement>()[0].GetComponentInChildren<TextMeshProUGUI>().text = FTName.text;
             copy.GetComponentsInChildren<TextMeshProUGUI>()[3].text = FTVolume.text + " Л";
-            copy.GetComponentsInChildren<TextMeshProUGUI>()[4].text = fuelTypeList[fuelType.value];
+            copy.GetComponentsInChildren<TextMeshProUGUI>()[4].text = db.FuelList[fuelType.value].name;
             setLinks(copy);
         }
         
@@ -164,10 +172,18 @@ public class DBWorker : MonoBehaviour
     public void addFD()
     {
         if (toChange) {
+            DBManager.ExecuteQueryWithoutAnswer($"UPDATE TRK set TRK_name='{FDName.text}',TRK_speed={int.Parse(FDSpeed.text)} where TRK_id={prefab.GetComponentsInChildren<ObjectPars>()[0].id}");
+            prefab.GetComponentsInChildren<ObjectPars>()[0].name = FDName.text;
+            prefab.GetComponentsInChildren<ObjectPars>()[0].par1 = int.Parse(FDSpeed.text);
             prefab.GetComponentsInChildren<LayoutElement>()[0].GetComponentInChildren<TextMeshProUGUI>().text = FDName.text;
             prefab.GetComponentsInChildren<TextMeshProUGUI>()[2].text = FDSpeed.text + " Л/С";
         } else {
             var copy = Instantiate(prefab, content.transform);
+            DBManager.ExecuteQueryWithoutAnswer($"INSERT INTO TRK(TRK_name,TRK_speed) VALUES ('{FDName.text}',{int.Parse(FDSpeed.text)});");
+            int ind = int.Parse(DBManager.ExecuteQueryWithAnswer("SELECT max(TRK_id) from TRK"));
+            copy.GetComponentsInChildren<ObjectPars>()[0].id = ind;
+            copy.GetComponentsInChildren<ObjectPars>()[0].name = FDName.text;
+            copy.GetComponentsInChildren<ObjectPars>()[0].par1 = int.Parse(FDSpeed.text);
             copy.GetComponentsInChildren<LayoutElement>()[0].GetComponentInChildren<TextMeshProUGUI>().text = FDName.text;
             copy.GetComponentsInChildren<TextMeshProUGUI>()[2].text = FDSpeed.text + " Л/С";
             setLinks(copy);
@@ -179,33 +195,53 @@ public class DBWorker : MonoBehaviour
     public void addFuelType()
     {
         if (toChange) {
-            fuelTypeList[fuelTypeList.IndexOf(stringtochange)] = fuelName.text;
+            DBManager.ExecuteQueryWithoutAnswer($"UPDATE Ftype set Ftype_name='{fuelName.text}',Ftype_price={int.Parse(fuelPrice.text)} where Ftype_id={prefab.GetComponentsInChildren<ObjectPars>()[0].id}");
+            prefab.GetComponentsInChildren<ObjectPars>()[0].name = fuelName.text;
+            prefab.GetComponentsInChildren<ObjectPars>()[0].par1 = int.Parse(fuelPrice.text);
+            db.Fhelp[db.Fhelp.IndexOf(stringtochange)] = fuelName.text;
+            db.ReloadFuel();
             prefab.GetComponentsInChildren<LayoutElement>()[0].GetComponentInChildren<TextMeshProUGUI>().text = fuelName.text;
             prefab.GetComponentsInChildren<TextMeshProUGUI>()[2].text = fuelPrice.text + " руб.";
         } else {
             var copy = Instantiate(prefab, content.transform);
+            DBManager.ExecuteQueryWithoutAnswer($"INSERT INTO Ftype(Ftype_name,Ftype_price) VALUES ('{fuelName.text}',{int.Parse(fuelPrice.text)});");
+            int ind = int.Parse(DBManager.ExecuteQueryWithAnswer("SELECT max(Ftype_id) from Ftype"));
+            copy.GetComponentsInChildren<ObjectPars>()[0].id = ind;
+            copy.GetComponentsInChildren<ObjectPars>()[0].name = FDName.text;
+            copy.GetComponentsInChildren<ObjectPars>()[0].par1 = int.Parse(FDSpeed.text);
             copy.GetComponentsInChildren<LayoutElement>()[0].GetComponentInChildren<TextMeshProUGUI>().text = fuelName.text;
             copy.GetComponentsInChildren<TextMeshProUGUI>()[2].text = fuelPrice.text + " руб.";
-            fuelTypeList.Add(fuelName.text);
+            db.ReloadFuel();
             setLinks(copy);
         }
         
-        
-        setDropDown();
+        db.setDropDown();
         fuelName.text = "";
         fuelPrice.text = "";
     }
     public void addCar()
     {
         if (toChange) {
+            DBManager.ExecuteQueryWithoutAnswer($"UPDATE Car set car_name='{carName.text}',car_volume={int.Parse(carVolume.text)},car_ftype_id={db.FuelList[fuelType.value].id} where car_id={prefab.GetComponentsInChildren<ObjectPars>()[0].id}");
+            prefab.GetComponentsInChildren<ObjectPars>()[0].name = carName.text;
+            prefab.GetComponentsInChildren<ObjectPars>()[0].par1 = int.Parse(carVolume.text);
+            prefab.GetComponentsInChildren<ObjectPars>()[0].fuel_id = db.FuelList[fuelType.value].id;
+            prefab.GetComponentsInChildren<ObjectPars>()[0].fuel_name = db.FuelList[fuelType.value].name;
             prefab.GetComponentsInChildren<LayoutElement>()[0].GetComponentInChildren<TextMeshProUGUI>().text = carName.text;
             prefab.GetComponentsInChildren<TextMeshProUGUI>()[3].text = carVolume.text + " Л";
-            prefab.GetComponentsInChildren<TextMeshProUGUI>()[4].text = fuelTypeList[carFuelType.value];
+            prefab.GetComponentsInChildren<TextMeshProUGUI>()[4].text = db.FuelList[fuelType.value].name;
         } else {
             var copy = Instantiate(prefab, content.transform);
+            DBManager.ExecuteQueryWithoutAnswer($"INSERT INTO Car(car_name,car_volume,car_ftype_id) VALUES ('{carName.text}',{int.Parse(carVolume.text)},{db.FuelList[fuelType.value].id});");
+            int ind = int.Parse(DBManager.ExecuteQueryWithAnswer("SELECT max(ftank_id) from FuelTank"));
+            copy.GetComponentsInChildren<ObjectPars>()[0].id = ind;
+            copy.GetComponentsInChildren<ObjectPars>()[0].name = carName.text;
+            copy.GetComponentsInChildren<ObjectPars>()[0].par1 = int.Parse(carVolume.text);
+            copy.GetComponentsInChildren<ObjectPars>()[0].fuel_id = db.FuelList[fuelType.value].id;
+            copy.GetComponentsInChildren<ObjectPars>()[0].fuel_name = db.FuelList[fuelType.value].name;
             copy.GetComponentsInChildren<LayoutElement>()[0].GetComponentInChildren<TextMeshProUGUI>().text = carName.text;
             copy.GetComponentsInChildren<TextMeshProUGUI>()[3].text = carVolume.text + " Л";
-            copy.GetComponentsInChildren<TextMeshProUGUI>()[4].text = fuelTypeList[carFuelType.value];
+            copy.GetComponentsInChildren<TextMeshProUGUI>()[4].text = db.FuelList[fuelType.value].name;
             setLinks(copy);
         }
         

@@ -5,13 +5,19 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Data;
 using UnityEngine;
-
 public class DBTest : MonoBehaviour
 {
     public GameObject prefabCar;
     public GameObject prefabTRK;
     public GameObject prefabFT;
     public GameObject prefabFtype;
+    public TMP_Dropdown fuelType;
+    public TMP_Dropdown carFuelType;
+    public List<FT> FTList = new List<FT>();
+    public List<Car> CarList= new List<Car>();
+    public List<FD> FDList= new List<FD>();
+    public List<Fuel> FuelList= new List<Fuel>();
+    public List<string> Fhelp;
     private void Start()
     {
         DataTable fTankTable = DBManager.GetTable("SELECT ftank_id, ftank_name,ftank_volume,ftank_ftype_id, ft.ftype_name FROM FuelTank left join Ftype as ft on ftank_ftype_id=ft.Ftype_id;");
@@ -19,31 +25,149 @@ public class DBTest : MonoBehaviour
         DataTable TRKTable = DBManager.GetTable("SELECT * FROM TRK;");
         DataTable ftypeTable = DBManager.GetTable("SELECT * FROM Ftype;");
         for (int i=0;i<CarTable.Rows.Count;i++){
-        var copy = Instantiate(prefabCar, GameObject.Find("CarContent").transform);
+            Car car = new Car();
+            car.id=int.Parse(CarTable.Rows[i][0].ToString());
+            car.name = CarTable.Rows[i][1].ToString();
+            car.volume=int.Parse(CarTable.Rows[i][2].ToString());
+            car.fuel_id=int.Parse(CarTable.Rows[i][3].ToString());
+            car.fuel_name=CarTable.Rows[i][4].ToString();
+            CarList.Add(car);
+            var copy = Instantiate(prefabCar, GameObject.Find("CarContent").transform);
+            copy.GetComponentsInChildren<ObjectPars>()[0].type = 0;
+            copy.GetComponentsInChildren<ObjectPars>()[0].id = int.Parse(CarTable.Rows[i][0].ToString());
+            copy.GetComponentsInChildren<ObjectPars>()[0].name = CarTable.Rows[i][1].ToString();
+            copy.GetComponentsInChildren<ObjectPars>()[0].par1 = int.Parse(CarTable.Rows[i][2].ToString());
+            copy.GetComponentsInChildren<ObjectPars>()[0].fuel_id = int.Parse(CarTable.Rows[i][3].ToString());
+            copy.GetComponentsInChildren<ObjectPars>()[0].fuel_name = CarTable.Rows[i][4].ToString();
             copy.GetComponentsInChildren<LayoutElement>()[0].GetComponentInChildren<TextMeshProUGUI>().text = CarTable.Rows[i][1].ToString();
             copy.GetComponentsInChildren<TextMeshProUGUI>()[3].text = CarTable.Rows[i][2].ToString() + " Л";
             copy.GetComponentsInChildren<TextMeshProUGUI>()[4].text = CarTable.Rows[i][4].ToString();
-            //setLinks(copy);
         }
         for (int i=0;i<fTankTable.Rows.Count;i++){
-        var copy = Instantiate(prefabFT, GameObject.Find("fTContent").transform);
+            FT ft =  new FT();
+            ft.id = int.Parse(fTankTable.Rows[i][0].ToString());
+            ft.name=fTankTable.Rows[i][1].ToString();
+            ft.volume = int.Parse(fTankTable.Rows[i][2].ToString());
+            ft.fuel_id = int.Parse(fTankTable.Rows[i][3].ToString());
+            ft.fuel_name=fTankTable.Rows[i][4].ToString();
+            FTList.Add(ft);
+            var copy = Instantiate(prefabFT, GameObject.Find("fTContent").transform);
+            copy.GetComponentsInChildren<ObjectPars>()[0].type = 1;
+            copy.GetComponentsInChildren<ObjectPars>()[0].id = int.Parse(fTankTable.Rows[i][0].ToString());
+            copy.GetComponentsInChildren<ObjectPars>()[0].name = fTankTable.Rows[i][1].ToString();
+            copy.GetComponentsInChildren<ObjectPars>()[0].par1 = int.Parse(fTankTable.Rows[i][2].ToString());
+            copy.GetComponentsInChildren<ObjectPars>()[0].fuel_id = int.Parse(fTankTable.Rows[i][3].ToString());
+            copy.GetComponentsInChildren<ObjectPars>()[0].fuel_name = fTankTable.Rows[i][4].ToString();
             copy.GetComponentsInChildren<LayoutElement>()[0].GetComponentInChildren<TextMeshProUGUI>().text = fTankTable.Rows[i][1].ToString();
             copy.GetComponentsInChildren<TextMeshProUGUI>()[3].text = fTankTable.Rows[i][2].ToString() + " Л";
             copy.GetComponentsInChildren<TextMeshProUGUI>()[4].text = fTankTable.Rows[i][4].ToString();
-            //setLinks(copy);
         }
         for (int i=0;i<TRKTable.Rows.Count;i++){
-       var copy = Instantiate(prefabTRK, GameObject.Find("fDContent").transform);
+            FD fd = new FD();
+            fd.id = int.Parse(TRKTable.Rows[i][0].ToString());
+            fd.name = TRKTable.Rows[i][1].ToString();
+            fd.speed = int.Parse(TRKTable.Rows[i][2].ToString());
+            FDList.Add(fd);
+            var copy = Instantiate(prefabTRK, GameObject.Find("fDContent").transform);
+            copy.GetComponentsInChildren<ObjectPars>()[0].type = 2;
+            copy.GetComponentsInChildren<ObjectPars>()[0].id = int.Parse(TRKTable.Rows[i][0].ToString());
+            copy.GetComponentsInChildren<ObjectPars>()[0].name = TRKTable.Rows[i][1].ToString();
+            copy.GetComponentsInChildren<ObjectPars>()[0].par1 = int.Parse(TRKTable.Rows[i][2].ToString());
             copy.GetComponentsInChildren<LayoutElement>()[0].GetComponentInChildren<TextMeshProUGUI>().text = TRKTable.Rows[i][1].ToString();
             copy.GetComponentsInChildren<TextMeshProUGUI>()[2].text = TRKTable.Rows[i][2].ToString() + " Л/С";
-            //setLinks(copy);
         }
         for (int i=0;i<ftypeTable.Rows.Count;i++){
-        var copy = Instantiate(prefabFtype, GameObject.Find("fuelContent").transform);
+            Fuel fuel = new Fuel();
+            fuel.id = int.Parse(ftypeTable.Rows[i][0].ToString());
+            fuel.name=ftypeTable.Rows[i][1].ToString();
+            fuel.price = int.Parse(ftypeTable.Rows[i][2].ToString());
+            FuelList.Add(fuel);
+            var copy = Instantiate(prefabFtype, GameObject.Find("fuelContent").transform);
+            copy.GetComponentsInChildren<ObjectPars>()[0].type = 3;
+            copy.GetComponentsInChildren<ObjectPars>()[0].id = int.Parse(ftypeTable.Rows[i][0].ToString());
+            copy.GetComponentsInChildren<ObjectPars>()[0].name = ftypeTable.Rows[i][1].ToString();
+            copy.GetComponentsInChildren<ObjectPars>()[0].par1 = int.Parse(ftypeTable.Rows[i][2].ToString());
             copy.GetComponentsInChildren<LayoutElement>()[0].GetComponentInChildren<TextMeshProUGUI>().text = ftypeTable.Rows[i][1].ToString();
             copy.GetComponentsInChildren<TextMeshProUGUI>()[2].text = ftypeTable.Rows[i][2].ToString() + " руб.";
-            //setLinks(copy);
         }
-        
+        setDropDown();
     }
+    public void setDropDown() {
+        Fhelp = new List<string>();
+        for (int i=0;FuelList.Count>i;i++)
+            Fhelp.Add(FuelList[i].name);
+        fuelType.ClearOptions();
+        fuelType.AddOptions(Fhelp);
+        carFuelType.ClearOptions();
+        carFuelType.AddOptions(Fhelp);
+    }
+    public void ReloadFuel(){
+        for (int i =0;i< GameObject.Find("CarContent").transform.childCount;i++){
+            var del = GameObject.Find("CarContent").transform.GetChild(i).gameObject;
+            Destroy(del);
+        }
+        for (int i =0;i< GameObject.Find("fTContent").transform.childCount;i++){
+            var del = GameObject.Find("fTContent").transform.GetChild(i).gameObject;
+            Destroy(del);
+        }
+        DataTable fTankTable = DBManager.GetTable("SELECT ftank_id, ftank_name,ftank_volume,ftank_ftype_id, ft.ftype_name FROM FuelTank left join Ftype as ft on ftank_ftype_id=ft.Ftype_id;");
+        DataTable CarTable = DBManager.GetTable("SELECT car_id, car_name, car_volume, car_ftype_id, ft.Ftype_name FROM Car left join Ftype as ft on car_ftype_id=ft.Ftype_id;");
+        for (int i=0;i<CarTable.Rows.Count;i++){
+            var copy = Instantiate(prefabCar, GameObject.Find("CarContent").transform);
+            copy.GetComponentsInChildren<ObjectPars>()[0].type = 0;
+            copy.GetComponentsInChildren<ObjectPars>()[0].id = int.Parse(CarTable.Rows[i][0].ToString());
+            copy.GetComponentsInChildren<ObjectPars>()[0].name = CarTable.Rows[i][1].ToString();
+            copy.GetComponentsInChildren<ObjectPars>()[0].par1 = int.Parse(CarTable.Rows[i][2].ToString());
+            copy.GetComponentsInChildren<ObjectPars>()[0].fuel_id = int.Parse(CarTable.Rows[i][3].ToString());
+            copy.GetComponentsInChildren<ObjectPars>()[0].fuel_name = CarTable.Rows[i][4].ToString();
+            copy.GetComponentsInChildren<LayoutElement>()[0].GetComponentInChildren<TextMeshProUGUI>().text = CarTable.Rows[i][1].ToString();
+            copy.GetComponentsInChildren<TextMeshProUGUI>()[3].text = CarTable.Rows[i][2].ToString() + " Л";
+            copy.GetComponentsInChildren<TextMeshProUGUI>()[4].text = CarTable.Rows[i][4].ToString();
+        }
+        FuelList = new List<Fuel>();
+        for (int i=0;i<fTankTable.Rows.Count;i++){
+             FT ft =  new FT();
+            ft.id = int.Parse(fTankTable.Rows[i][0].ToString());
+            ft.name=fTankTable.Rows[i][1].ToString();
+            ft.volume = int.Parse(fTankTable.Rows[i][2].ToString());
+            ft.fuel_id = int.Parse(fTankTable.Rows[i][3].ToString());
+            ft.fuel_name=fTankTable.Rows[i][4].ToString();
+            FTList.Add(ft);
+            var copy = Instantiate(prefabFT, GameObject.Find("fTContent").transform);
+            copy.GetComponentsInChildren<ObjectPars>()[0].type = 1;
+            copy.GetComponentsInChildren<ObjectPars>()[0].id = int.Parse(fTankTable.Rows[i][0].ToString());
+            copy.GetComponentsInChildren<ObjectPars>()[0].name = fTankTable.Rows[i][1].ToString();
+            copy.GetComponentsInChildren<ObjectPars>()[0].par1 = int.Parse(fTankTable.Rows[i][2].ToString());
+            copy.GetComponentsInChildren<ObjectPars>()[0].fuel_id = int.Parse(fTankTable.Rows[i][3].ToString());
+            copy.GetComponentsInChildren<ObjectPars>()[0].fuel_name = fTankTable.Rows[i][4].ToString();
+            copy.GetComponentsInChildren<LayoutElement>()[0].GetComponentInChildren<TextMeshProUGUI>().text = fTankTable.Rows[i][1].ToString();
+            copy.GetComponentsInChildren<TextMeshProUGUI>()[3].text = fTankTable.Rows[i][2].ToString() + " Л";
+            copy.GetComponentsInChildren<TextMeshProUGUI>()[4].text = fTankTable.Rows[i][4].ToString();
+        }
+        setDropDown();
+    }
+}
+public class Fuel{
+    public int id;
+    public string name;
+    public int price;
+}
+public class Car{
+    public int id;
+    public string name;
+    public int volume;
+    public int fuel_id;
+    public string fuel_name;
+}
+public class FD{
+    public int id;
+    public string name;
+    public int speed;
+}
+public class FT{
+    public int id;
+    public string name;
+    public int volume;
+    public int fuel_id;
+    public string fuel_name;
 }

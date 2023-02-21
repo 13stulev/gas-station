@@ -2887,6 +2887,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5056151657698958171, guid: 4168847d620fde24390bc171b66131fb, type: 3}
+      propertyPath: fuelType
+      value: 
+      objectReference: {fileID: 1584629438}
+    - target: {fileID: 5056151657698958171, guid: 4168847d620fde24390bc171b66131fb, type: 3}
+      propertyPath: carFuelType
+      value: 
+      objectReference: {fileID: 2114406247}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4168847d620fde24390bc171b66131fb, type: 3}
 --- !u!1 &145058387
@@ -9646,7 +9654,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 820509598}
   m_HandleRect: {fileID: 820509597}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -19217,6 +19225,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6420273020669474442, guid: d8bbf48c7c2884042abadb00c4ccf71b, type: 3}
+      propertyPath: db
+      value: 
+      objectReference: {fileID: 1952338563}
     - target: {fileID: 6420273020669474442, guid: d8bbf48c7c2884042abadb00c4ccf71b, type: 3}
       propertyPath: AddFD
       value: 
@@ -29370,6 +29382,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1939927161}
   m_CullTransparentMesh: 1
+--- !u!114 &1952338563 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5056151657698958171, guid: 4168847d620fde24390bc171b66131fb, type: 3}
+  m_PrefabInstance: {fileID: 140937531}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48ce08a5e0110d54da15171567f5313e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1973417769
 GameObject:
   m_ObjectHideFlags: 0
