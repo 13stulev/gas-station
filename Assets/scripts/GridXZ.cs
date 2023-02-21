@@ -1,14 +1,4 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading this package
-    I hope you find it useful in your projects
-    If you have any questions let me know
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
+﻿
 
 using System;
 using System.Collections;
@@ -50,13 +40,13 @@ public class GridXZ<TGridObject> {
 
             for (int x = 0; x < gridArray.GetLength(0); x++) {
                 for (int z = 0; z < gridArray.GetLength(1); z++) {
-                    debugTextArray[x, z] = UtilsClass.CreateWorldText(gridArray[x, z]?.ToString(), null, GetWorldPosition(x, z) + new Vector3(cellSize, 0, cellSize) * .5f, 15, Color.white, TextAnchor.MiddleCenter, TextAlignment.Center);
-                    Debug.DrawLine(GetWorldPosition(x, z), GetWorldPosition(x, z + 1), Color.white, 100f);
-                    Debug.DrawLine(GetWorldPosition(x, z), GetWorldPosition(x + 1, z), Color.white, 100f);
+                    debugTextArray[x, z] = UtilsClass.CreateWorldText(gridArray[x, z]?.ToString(), null, GetWorldPosition(x, z), 15, Color.white, TextAnchor.MiddleCenter, TextAlignment.Center);
+                    Debug.DrawLine(GetWorldPosition(x, z) - new Vector3(cellSize / 2, 0, cellSize / 2), GetWorldPosition(x, z + 1) - new Vector3(cellSize / 2, 0, cellSize / 2), Color.white, 100f);
+                    Debug.DrawLine(GetWorldPosition(x, z) - new Vector3(cellSize / 2, 0, cellSize / 2), GetWorldPosition(x + 1, z) - new Vector3(cellSize / 2, 0, cellSize / 2), Color.white, 100f);
                 }
             }
-            Debug.DrawLine(GetWorldPosition(0, height), GetWorldPosition(width, height), Color.white, 100f);
-            Debug.DrawLine(GetWorldPosition(width, 0), GetWorldPosition(width, height), Color.white, 100f);
+            Debug.DrawLine(GetWorldPosition(0, height) - new Vector3(cellSize / 2, 0, cellSize / 2), GetWorldPosition(width, height) - new Vector3(cellSize / 2, 0, cellSize / 2), Color.white, 100f);
+            Debug.DrawLine(GetWorldPosition(width, 0) - new Vector3(cellSize / 2, 0, cellSize / 2), GetWorldPosition(width, height) - new Vector3(cellSize / 2, 0, cellSize / 2), Color.white, 100f);
 
             OnGridObjectChanged += (object sender, OnGridObjectChangedEventArgs eventArgs) => {
                 debugTextArray[eventArgs.x, eventArgs.z].text = gridArray[eventArgs.x, eventArgs.z]?.ToString();
@@ -77,12 +67,12 @@ public class GridXZ<TGridObject> {
     }
 
     public Vector3 GetWorldPosition(int x, int z) {
-        return new Vector3(x, 0, z) * cellSize + originPosition;
+        return new Vector3(x, 0, z) * cellSize + originPosition - new Vector3(cellSize, 0, cellSize);
     }
 
     public void GetXZ(Vector3 worldPosition, out int x, out int z) {
-        x = Mathf.FloorToInt((worldPosition - originPosition).x / cellSize);
-        z = Mathf.FloorToInt((worldPosition - originPosition).z / cellSize);
+        x = Mathf.FloorToInt(((worldPosition - originPosition ).x + (cellSize / 2)) / cellSize) + 1;
+        z = Mathf.FloorToInt(((worldPosition - originPosition).z + (cellSize / 2)) / cellSize) + 1;
     }
 
     public void SetGridObject(int x, int z, TGridObject value) {

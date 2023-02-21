@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using Utils;
 
 public class GridBuildingSystem3D : MonoBehaviour {
     
@@ -70,11 +72,11 @@ public class GridBuildingSystem3D : MonoBehaviour {
         public bool CanBuild() {
             return placedObject == null;
         }
-
+        
     }
 
     private void Update() {
-        if (Input.GetMouseButtonDown(0) && placedObjectTypeSO != null) {
+        if (Input.GetMouseButtonDown(0) && placedObjectTypeSO != null && !IsMouseOverUI()) {
             Vector3 mousePosition = Mouse3D.GetMouseWorldPosition();
             grid.GetXZ(mousePosition, out int x, out int z);
 
@@ -93,7 +95,7 @@ public class GridBuildingSystem3D : MonoBehaviour {
    
             if (canBuild) {
                 Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
-                Vector3 placedObjectWorldPosition = grid.GetWorldPosition(placedObjectOrigin.x, placedObjectOrigin.y) + new Vector3(6f, 6f);
+                Vector3 placedObjectWorldPosition = grid.GetWorldPosition(placedObjectOrigin.x, placedObjectOrigin.y);
    
                 PlacedObject_Done placedObject = PlacedObject_Done.Create(placedObjectWorldPosition, placedObjectOrigin, dir, placedObjectTypeSO);
    
@@ -105,7 +107,8 @@ public class GridBuildingSystem3D : MonoBehaviour {
    
                 //DeselectObjectType();
             } else {
-                // Cannot build here
+                Vector3 placedObjectWorldPosition = grid.GetWorldPosition(placedObjectOrigin.x, placedObjectOrigin.y);
+                UtilsClass.CreateWorldTextPopup("Здесь нельзя строить", placedObjectWorldPosition);
                 
             }
         }
@@ -149,7 +152,10 @@ public class GridBuildingSystem3D : MonoBehaviour {
     private void RefreshSelectedObjectType() {
         OnSelectedChanged?.Invoke(this, EventArgs.Empty);
     }
-
+    private bool IsMouseOverUI()
+    {
+        return EventSystem.current.IsPointerOverGameObject();
+    }
 
     public Vector2Int GetGridPosition(Vector3 worldPosition) {
         grid.GetXZ(worldPosition, out int x, out int z);
@@ -162,7 +168,7 @@ public class GridBuildingSystem3D : MonoBehaviour {
 
         if (placedObjectTypeSO != null) {
             Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
-            Vector3 placedObjectWorldPosition = grid.GetWorldPosition(x, z) + new Vector3(rotationOffset.x, 0, rotationOffset.y) * grid.GetCellSize();
+            Vector3 placedObjectWorldPosition = grid.GetWorldPosition(x, z);
             return placedObjectWorldPosition;
         } else {
             return mousePosition;
