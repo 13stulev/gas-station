@@ -27,7 +27,7 @@ public class PlacedObjectTypeSO : ScriptableObject {
     public Transform visual;
     public int width;
     public int height;
-
+    public bool isWalkable; 
 
     public int GetRotationAngle(Dir dir) {
         switch (dir) {

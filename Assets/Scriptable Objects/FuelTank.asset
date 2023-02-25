@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5296c0ffc3e9a604db0fe1e4579f45be, type: 3}
   m_Name: FuelTank
   m_EditorClassIdentifier: 
-  nameString: 
-  prefab: {fileID: 7652426096319460990, guid: 8cb3f571799a0f345b62a1320e0bd321, type: 3}
-  visual: {fileID: 7652426096319460990, guid: 8cb3f571799a0f345b62a1320e0bd321, type: 3}
+  nameString: "\u0422\u0411"
+  prefab: {fileID: 4914668921818590852, guid: 3f17780017cfdbb45adb569c26ae0e59, type: 3}
+  visual: {fileID: 4914668921818590852, guid: d32b33b0ec2734b4f82649776f906fea, type: 3}
   width: 1
   height: 1

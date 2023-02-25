@@ -14,10 +14,17 @@ public class GridBuildingSystem3D : MonoBehaviour {
 
     
 
+<<<<<<< Updated upstream
     private GridXZ<GridObject> grid;
     //private GridXZ<GridObject> gridService;
     //private GridXZ<GridObject> gridroad;
     [SerializeField] private List<PlacedObjectTypeSO> placedObjectTypeSOList = null; // сериалайз филд
+=======
+    public GridXZ grid;
+    public GridXZ serviceGrid;
+    public GridXZ roadGrid;
+    [SerializeField] private List<PlacedObjectTypeSO> placedObjectTypeSOList = null;
+>>>>>>> Stashed changes
     private PlacedObjectTypeSO placedObjectTypeSO;
     private PlacedObjectTypeSO.Dir dir;
 
@@ -27,45 +34,71 @@ public class GridBuildingSystem3D : MonoBehaviour {
         int gridWidth = 10;
         int gridHeight = 10;
         float cellSize = 10f;
-        grid = new GridXZ<GridObject>(gridWidth, gridHeight, cellSize, new Vector3(0, 0, 0), (GridXZ<GridObject> g, int x, int y) => new GridObject(g, x, y));
+        grid = new GridXZ(gridWidth, gridHeight, cellSize, new Vector3(0, 0, 0));
+        serviceGrid = new GridXZ(3, gridHeight, cellSize, new Vector3(gridWidth * cellSize, 0, 0));
+        roadGrid = new GridXZ(gridWidth + 3, 1, cellSize, new Vector3(0, 0, -cellSize));
 
         placedObjectTypeSO = placedObjectTypeSOList[0];
+        for(int i = 0; i < gridWidth + 3; i++)
+        {
+            PlacedObject_Done placedObject = PlacedObject_Done.Create(roadGrid.GetWorldPosition(i, 0), new Vector2Int(i, 0), dir, placedObjectTypeSOList[1]);
+            roadGrid.GetGridObject(i, 0).SetPlacedObject(placedObject);
+        }
     }
-    public void SetPO(int code){
-        if (code==0) { placedObjectTypeSO = placedObjectTypeSOList[0]; RefreshSelectedObjectType(); }
-       if (code==1) { placedObjectTypeSO = placedObjectTypeSOList[1]; RefreshSelectedObjectType(); }
-       if (code==2) { placedObjectTypeSO = placedObjectTypeSOList[2]; RefreshSelectedObjectType(); }
-       if (code==3) { placedObjectTypeSO = placedObjectTypeSOList[3]; RefreshSelectedObjectType(); }
-       if (code==4) { placedObjectTypeSO = placedObjectTypeSOList[4]; RefreshSelectedObjectType(); }
-       if (code==5) { placedObjectTypeSO = placedObjectTypeSOList[5]; RefreshSelectedObjectType(); }
-    }
-    public class GridObject {
+    
+    public class GridObject : IHeapItem<GridObject> {
 
-        private GridXZ<GridObject> grid;
+        public GridXZ grid;
         private int x;
         private int y;
+        private bool isWalkable;
+        private bool isStopable;
         public PlacedObject_Done placedObject;
 
+<<<<<<< Updated upstream
         // одна ячейка с хранением, есть ли здание и координаты
         public GridObject(GridXZ<GridObject> grid, int x, int y) {
+=======
+        public int gCost;
+        public int hCost;
+        public GridObject parent;
+        int heapIndex;
+        public int fCost
+        {
+            get
+            {
+                return gCost + hCost;
+            }
+        }
+        public GridObject(GridXZ grid, int x, int y) {
+>>>>>>> Stashed changes
             this.grid = grid;
             this.x = x;
             this.y = y;
             placedObject = null;
         }
 
+        public int getX() {
+            return x;
+        }
+        public int getY()
+        {
+            return y;
+        }
         public override string ToString() {
             return x + ", " + y + "\n" + placedObject;
         }
 
         public void SetPlacedObject(PlacedObject_Done placedObject) {
             this.placedObject = placedObject;
-            grid.TriggerGridObjectChanged(x, y);
+            isWalkable = placedObject.isWalkable();
+            grid.TriggerGridObjectChanged(x, y, isWalkable);
         }
 
         public void ClearPlacedObject() {
             placedObject = null;
-            grid.TriggerGridObjectChanged(x, y);
+            isWalkable = false;
+            grid.TriggerGridObjectChanged(x, y, false);
         }
 
         public PlacedObject_Done GetPlacedObject() {
@@ -75,7 +108,31 @@ public class GridBuildingSystem3D : MonoBehaviour {
         public bool CanBuild() {
             return placedObject == null;
         }
-        
+        public bool getIsWalkable()
+        {
+            return isWalkable;
+        }
+
+        public int HeapIndex {
+            get
+            {
+                return heapIndex;
+            }
+            set
+            {
+                heapIndex = value;
+            }
+        }
+
+        public int CompareTo(GridObject other)
+        {
+            int compare = fCost.CompareTo(other.fCost);
+            if (compare == 0)
+            {
+                compare = hCost.CompareTo(other.hCost);
+            }
+            return -compare;
+        }
     }
 
     // проверяет ли кнопка или нет, проверяет координаты нажатой ячейки, делает их читаемыми, ставит объект на ячейку
@@ -128,6 +185,7 @@ public class GridBuildingSystem3D : MonoBehaviour {
        if (Input.GetKeyDown(KeyCode.Alpha4)) { placedObjectTypeSO = placedObjectTypeSOList[3]; RefreshSelectedObjectType(); }
        if (Input.GetKeyDown(KeyCode.Alpha5)) { placedObjectTypeSO = placedObjectTypeSOList[4]; RefreshSelectedObjectType(); }
        if (Input.GetKeyDown(KeyCode.Alpha6)) { placedObjectTypeSO = placedObjectTypeSOList[5]; RefreshSelectedObjectType(); }
+       if (Input.GetKeyDown(KeyCode.R)) { var car = GameObject.Find("sedanpref"); car.transform.position = grid.GetWorldPosition(5, 1); car.GetComponent<Unit>().request();}
    
        if (Input.GetKeyDown(KeyCode.Alpha0)) { DeselectObjectType(); }
    

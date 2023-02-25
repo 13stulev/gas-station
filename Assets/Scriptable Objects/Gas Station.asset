@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5296c0ffc3e9a604db0fe1e4579f45be, type: 3}
   m_Name: Gas Station
   m_EditorClassIdentifier: 
-  nameString: 
-  prefab: {fileID: 6368686047752921993, guid: 29725390facc2bf4ea3ed90cfcb9164d, type: 3}
-  visual: {fileID: 6368686047752921993, guid: dacd5a4c1de1f28419c92ca0c103837a, type: 3}
+  nameString: "\u0422\u0420\u041A"
+  prefab: {fileID: 4914668921818590852, guid: e39bd9d855b7c03408759cdb2b2b74e9, type: 3}
+  visual: {fileID: 4914668921818590852, guid: 3aea6d4a08c0e88468905b4c6b479b19, type: 3}
   width: 1
   height: 1

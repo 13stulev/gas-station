@@ -38,4 +38,8 @@ public class PlacedObject_Done : MonoBehaviour {
         return placedObjectTypeSO.nameString;
     }
 
+    public bool isWalkable()
+    {
+        return placedObjectTypeSO.isWalkable;
+    }
 }

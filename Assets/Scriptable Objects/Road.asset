@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5296c0ffc3e9a604db0fe1e4579f45be, type: 3}
   m_Name: Road
   m_EditorClassIdentifier: 
-  nameString: 
-  prefab: {fileID: 311748503615019223, guid: 4b92dc2ee180db748a2ad75bc3f091a0, type: 3}
-  visual: {fileID: 311748503615019223, guid: 4b92dc2ee180db748a2ad75bc3f091a0, type: 3}
+  nameString: "\u0414\u043E\u0440\u043E\u0433\u0430"
+  prefab: {fileID: 1882874688320579191, guid: eb70a50a648ab6c4c917573e41d96899, type: 3}
+  visual: {fileID: 1882874688320579191, guid: eb70a50a648ab6c4c917573e41d96899, type: 3}
   width: 1
   height: 1
+  isWalkable: 1
